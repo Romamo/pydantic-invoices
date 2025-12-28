@@ -1,9 +1,17 @@
 """Invoice schemas - Pure Pydantic models."""
 
 from __future__ import annotations
+from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict, computed_field
 from datetime import datetime, date
 from typing import Optional, List, TYPE_CHECKING
+
+
+class InvoiceStatus(str, Enum):
+    """Valid invoice status values."""
+    UNPAID = "UNPAID"
+    PARTIALLY_PAID = "PARTIALLY_PAID"
+    PAID = "PAID"
 
 if TYPE_CHECKING:
     from .invoice_line import InvoiceLine, InvoiceLineCreate
@@ -20,10 +28,9 @@ class InvoiceBase(BaseModel):
     issue_date: datetime = Field(
         default_factory=datetime.now, description="Invoice issue date"
     )
-    status: str = Field(
-        default="UNPAID",
-        max_length=20,
-        description="Invoice status (UNPAID, PARTIALLY_PAID, PAID)",
+    status: InvoiceStatus = Field(
+        default=InvoiceStatus.UNPAID,
+        description="Invoice payment status",
     )
     due_date: Optional[date] = Field(None, description="Payment due date")
     payment_terms: str = Field(
@@ -64,7 +71,7 @@ class InvoiceCreate(InvoiceBase):
 class InvoiceUpdate(BaseModel):
     """Schema for updating an invoice."""
 
-    status: Optional[str] = Field(None, max_length=20)
+    status: Optional[InvoiceStatus] = None
     due_date: Optional[date] = None
     payment_terms: Optional[str] = Field(None, max_length=100)
 
@@ -101,7 +108,7 @@ class Invoice(InvoiceBase):
     @property
     def is_overdue(self) -> bool:
         """Check if invoice is past due date."""
-        if self.status == "PAID":
+        if self.status == InvoiceStatus.PAID:
             return False
         if self.due_date:
             return date.today() > self.due_date

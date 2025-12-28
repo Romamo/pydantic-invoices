@@ -5,6 +5,7 @@ from pydantic_invoices.schemas.invoice import (
     Invoice,
     InvoiceCreate,
     InvoiceUpdate,
+    InvoiceStatus,
 )
 from pydantic_invoices.schemas.invoice_line import InvoiceLine, InvoiceLineCreate
 
@@ -20,7 +21,7 @@ class TestInvoiceCreate:
             company_id=1,
             issue_date=datetime.now(),
             due_date=date.today() + timedelta(days=30),
-            status="UNPAID",
+            status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
             lines=[],
         )
@@ -35,7 +36,7 @@ class TestInvoiceCreate:
             client_id=1,
             issue_date=datetime.now(),
             due_date=date.today(),
-            status="UNPAID",
+            status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
             lines=[],
         )
@@ -60,7 +61,7 @@ class TestInvoiceCreate:
             client_id=1,
             issue_date=datetime.now(),
             due_date=date.today(),
-            status="UNPAID",
+            status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
             lines=lines,
         )
@@ -80,7 +81,7 @@ class TestInvoice:
             company_id=1,
             issue_date=datetime.now(),
             due_date=date.today(),
-            status="UNPAID",
+            status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
             lines=[
                 InvoiceLine(
@@ -111,7 +112,7 @@ class TestInvoice:
             company_id=1,
             issue_date=datetime.now(),
             due_date=date.today(),
-            status="UNPAID",
+            status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
             lines=[
                 InvoiceLine(
@@ -136,7 +137,7 @@ class TestInvoice:
             company_id=1,
             issue_date=datetime.now(),
             due_date=date.today() + timedelta(days=1),
-            status="UNPAID",
+            status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
             lines=[],
             payments=[],
@@ -151,7 +152,7 @@ class TestInvoice:
             company_id=1,
             issue_date=datetime.now() - timedelta(days=60),
             due_date=date.today() - timedelta(days=30),
-            status="UNPAID",
+            status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
             lines=[],
             payments=[],
@@ -167,7 +168,7 @@ class TestInvoice:
             company_id=1,
             issue_date=datetime.now() - timedelta(days=60),
             due_date=date.today() - timedelta(days=30),
-            status="PAID",
+            status=InvoiceStatus.PAID,
             payment_terms="Net 30",
             lines=[],
             payments=[],
@@ -183,7 +184,7 @@ class TestInvoice:
             company_id=1,
             issue_date=datetime.now(),
             due_date=None,  # No due date
-            status="UNPAID",
+            status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
             lines=[],
             payments=[],
@@ -197,16 +198,16 @@ class TestInvoiceUpdate:
 
     def test_partial_update(self):
         """Test that InvoiceUpdate allows partial updates."""
-        update = InvoiceUpdate(status="PAID")
-        assert update.status == "PAID"
+        update = InvoiceUpdate(status=InvoiceStatus.PAID)
+        assert update.status == InvoiceStatus.PAID
         assert update.due_date is None
         assert update.payment_terms is None
 
     def test_update_multiple_fields(self):
         """Test updating multiple fields."""
         update = InvoiceUpdate(
-            status="PAID",
+            status=InvoiceStatus.PAID,
             payment_terms="Net 15",
         )
-        assert update.status == "PAID"
+        assert update.status == InvoiceStatus.PAID
         assert update.payment_terms == "Net 15"

@@ -3,7 +3,7 @@
 from abc import abstractmethod
 from typing import Optional, List, Dict, Any
 from .base import BaseRepository
-from ..schemas import Invoice
+from ..schemas import Invoice, InvoiceStatus
 
 
 class InvoiceRepository(BaseRepository[Invoice]):
@@ -20,7 +20,7 @@ class InvoiceRepository(BaseRepository[Invoice]):
         pass
 
     @abstractmethod
-    def get_by_status(self, status: str) -> List[Invoice]:
+    def get_by_status(self, status: InvoiceStatus) -> List[Invoice]:
         """Get invoices by status."""
         pass
 
