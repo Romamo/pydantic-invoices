@@ -14,8 +14,10 @@ uv add pydantic-invoices
 
 ### Using Schemas
 
+
 ```python
 from pydantic_invoices import Invoice, InvoiceCreate, Client, ClientCreate
+from pydantic_invoices.schemas import InvoiceStatus, InvoiceType
 from datetime import datetime
 
 # Create invoice data
@@ -25,7 +27,8 @@ invoice_data = InvoiceCreate(
     company_id=1,
     issue_date=datetime.now(),
     due_date=datetime.now(),
-    status="UNPAID",
+    status=InvoiceStatus.DRAFT,
+    type=InvoiceType.STANDARD,
     payment_terms="Net 30",
     lines=[],
 )
@@ -33,6 +36,12 @@ invoice_data = InvoiceCreate(
 # Validate and use
 invoice = Invoice(id=1, **invoice_data.model_dump())
 ```
+
+### Invoice Statuses & Types
+The library supports a strict state machine workflow:
+- **Statuses**: `DRAFT`, `SENT`, `PAID`, `PARTIALLY_PAID`, `CANCELLED`, `REFUNDED`, `CREDITED`.
+- **Types**: `STANDARD`, `CREDIT_NOTE`.
+- **Linking**: `Credit Notes` can be linked to original invoices via `original_invoice_id`.
 
 ### Implementing Repository Interfaces
 
@@ -59,6 +68,8 @@ class MyInvoiceRepo(InvoiceRepository):
 - ✅ No implementation dependencies
 - ✅ Fully typed with mypy support
 - ✅ Clean separation of concerns
+- ✅ Support for **Credit Notes** and **Strict Lifecycle**
+
 
 ## Schemas Included
 

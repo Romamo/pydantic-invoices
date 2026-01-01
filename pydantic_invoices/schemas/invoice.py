@@ -7,11 +7,24 @@ from datetime import datetime, date
 from typing import Optional, List, TYPE_CHECKING
 
 
+
 class InvoiceStatus(str, Enum):
     """Valid invoice status values."""
-    UNPAID = "UNPAID"
+    DRAFT = "DRAFT"
+    SENT = "SENT"
+    UNPAID = "UNPAID"  # Legacy/Simple flow
     PARTIALLY_PAID = "PARTIALLY_PAID"
     PAID = "PAID"
+    CANCELLED = "CANCELLED"
+    REFUNDED = "REFUNDED"
+    CREDITED = "CREDITED"
+
+
+class InvoiceType(str, Enum):
+    """Type of invoice document."""
+    STANDARD = "STANDARD"
+    CREDIT_NOTE = "CREDIT_NOTE"
+
 
 if TYPE_CHECKING:
     from .invoice_line import InvoiceLine, InvoiceLineCreate
@@ -29,14 +42,26 @@ class InvoiceBase(BaseModel):
         default_factory=datetime.now, description="Invoice issue date"
     )
     status: InvoiceStatus = Field(
-        default=InvoiceStatus.UNPAID,
+        default=InvoiceStatus.DRAFT,
         description="Invoice payment status",
+    )
+    type: InvoiceType = Field(
+        default=InvoiceType.STANDARD,
+        description="Type of invoice (Standard or Credit Note)",
     )
     due_date: Optional[date] = Field(None, description="Payment due date")
     payment_terms: str = Field(
         default="Net 30",
         max_length=100,
         description="Payment terms (e.g., Net 30, Net 60)",
+    )
+
+    # linking
+    original_invoice_id: Optional[int] = Field(
+        None, description="ID of the original invoice (for Credit Notes)"
+    )
+    reason: Optional[str] = Field(
+        None, max_length=500, description="Reason for credit note or cancellation"
     )
 
     # Company (defaults to company #1)
@@ -66,6 +91,10 @@ class InvoiceCreate(InvoiceBase):
 
     client_id: int = Field(..., description="Client ID")
     lines: List["InvoiceLineCreate"] = Field(default_factory=list)
+    status: InvoiceStatus = Field(
+        default=InvoiceStatus.DRAFT,  # Default to DRAFT when creating
+        description="Invoice payment status",
+    )
 
 
 class InvoiceUpdate(BaseModel):
@@ -74,6 +103,8 @@ class InvoiceUpdate(BaseModel):
     status: Optional[InvoiceStatus] = None
     due_date: Optional[date] = None
     payment_terms: Optional[str] = Field(None, max_length=100)
+    reason: Optional[str] = Field(None, max_length=500)
+
 
 
 class Invoice(InvoiceBase):
@@ -82,6 +113,9 @@ class Invoice(InvoiceBase):
     id: int
     company_id: int  # Required
     client_id: int
+    type: InvoiceType = Field(default=InvoiceType.STANDARD)
+    original_invoice_id: Optional[int] = None
+    reason: Optional[str] = None
     lines: List["InvoiceLine"] = Field(default_factory=list)
     payments: List["Payment"] = Field(default_factory=list)
     audit_logs: List["AuditLog"] = Field(default_factory=list)
@@ -108,7 +142,7 @@ class Invoice(InvoiceBase):
     @property
     def is_overdue(self) -> bool:
         """Check if invoice is past due date."""
-        if self.status == InvoiceStatus.PAID:
+        if self.status in (InvoiceStatus.PAID, InvoiceStatus.CANCELLED, InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED):
             return False
         if self.due_date:
             return date.today() > self.due_date
