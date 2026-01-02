@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.1
+
+- Added release workflow (`release_new_version`).
+- Added GitHub Actions workflow for publishing.
+- Fixed repository URLs in `pyproject.toml`.
+- Refactored tests structure.
+
 ## 1.2.0
 
 - Initial release with tag.
