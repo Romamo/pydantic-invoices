@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.2
+
+- Added smoke test.
+- Added GitHub Actions CI workflow.
+
 ## 1.2.1
 
 - Added release workflow (`release_new_version`).
