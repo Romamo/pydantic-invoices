@@ -3,10 +3,10 @@
 from abc import abstractmethod
 from typing import Optional, List, Dict, Any
 from .base import BaseRepository
-from ..schemas import Invoice, InvoiceStatus
+from ..schemas import Invoice, InvoiceCreate, InvoiceStatus
 
 
-class InvoiceRepository(BaseRepository[Invoice]):
+class InvoiceRepository(BaseRepository[Invoice, InvoiceCreate]):
     """Abstract invoice repository interface."""
 
     @abstractmethod

@@ -61,6 +61,10 @@ class MyInvoiceRepo(InvoiceRepository):
     # ... implement other methods
 ```
 
+## Architecture
+
+See [System Diagram](docs/system_diagram.md) for a visual overview of the entities and their relationships.
+
 ## Features
 
 - ✅ Type-safe Pydantic v2 schemas

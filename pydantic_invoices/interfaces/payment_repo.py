@@ -3,10 +3,10 @@
 from abc import abstractmethod
 from typing import List
 from .base import BaseRepository
-from ..schemas import Payment
+from ..schemas import Payment, PaymentCreate
 
 
-class PaymentRepository(BaseRepository[Payment]):
+class PaymentRepository(BaseRepository[Payment, PaymentCreate]):
     """Abstract payment repository interface."""
 
     @abstractmethod

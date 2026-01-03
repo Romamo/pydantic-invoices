@@ -3,10 +3,10 @@
 from abc import abstractmethod
 from typing import Optional, List
 from .base import BaseRepository
-from ..schemas import Client
+from ..schemas import Client, ClientCreate
 
 
-class ClientRepository(BaseRepository[Client]):
+class ClientRepository(BaseRepository[Client, ClientCreate]):
     """Abstract client repository interface."""
 
     @abstractmethod

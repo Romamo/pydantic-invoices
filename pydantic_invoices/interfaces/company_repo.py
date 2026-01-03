@@ -3,10 +3,10 @@
 from abc import abstractmethod
 from typing import Optional, List
 from .base import BaseRepository
-from ..schemas.company import Company
+from ..schemas.company import Company, CompanyCreate
 
 
-class CompanyRepository(BaseRepository[Company]):
+class CompanyRepository(BaseRepository[Company, CompanyCreate]):
     """Abstract company repository interface."""
 
     @abstractmethod

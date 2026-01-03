@@ -1,31 +1,30 @@
-"""Base repository with common CRUD operations."""
-
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar, Optional, List
 
-T = TypeVar("T")
+M = TypeVar("M")
+C = TypeVar("C")
 
 
-class BaseRepository(ABC, Generic[T]):
+class BaseRepository(ABC, Generic[M, C]):
     """Abstract base repository interface."""
 
     @abstractmethod
-    def create(self, entity: T) -> T:
+    def create(self, entity: C) -> M:
         """Create a new entity."""
         pass
 
     @abstractmethod
-    def get_by_id(self, entity_id: int) -> Optional[T]:
+    def get_by_id(self, entity_id: int) -> Optional[M]:
         """Get entity by ID."""
         pass
 
     @abstractmethod
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[T]:
+    def get_all(self, skip: int = 0, limit: int = 100) -> List[M]:
         """Get all entities with pagination."""
         pass
 
     @abstractmethod
-    def update(self, entity: T) -> T:
+    def update(self, entity: M) -> M:
         """Update an entity."""
         pass
 

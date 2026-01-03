@@ -3,10 +3,10 @@
 from abc import abstractmethod
 from typing import Optional, List
 from .base import BaseRepository
-from ..schemas.product import Product
+from ..schemas.product import Product, ProductCreate
 
 
-class ProductRepository(BaseRepository[Product]):
+class ProductRepository(BaseRepository[Product, ProductCreate]):
     """Abstract product repository interface."""
 
     @abstractmethod
