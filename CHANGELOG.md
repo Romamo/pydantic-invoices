@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0
+
+- Added `py.typed` marker.
+- Updated repository interfaces (`ClientRepository` searches).
+- Added system diagram documentation.
+
 ## 1.2.2
 
 - Added smoke test.
