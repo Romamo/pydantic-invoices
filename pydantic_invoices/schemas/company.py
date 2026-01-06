@@ -1,7 +1,7 @@
 """Company schema - for multi-company invoicing."""
 
-from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional
+from pydantic import BaseModel, Field, ConfigDict, field_validator
+from typing import Optional, Union
 
 
 class CompanyBase(BaseModel):
@@ -25,6 +25,14 @@ class CompanyBase(BaseModel):
         None, max_length=20, description="Postal/ZIP code"
     )
     country: Optional[str] = Field(None, max_length=100, description="Country")
+
+    @field_validator("postal_code", mode="before")
+    @classmethod
+    def coerce_postal_code(cls, v: Union[str, int, None]) -> Optional[str]:
+        """Coerce integer postal codes (from YAML) to strings."""
+        if isinstance(v, int):
+            return str(v)
+        return v
 
     email: Optional[str] = Field(
         None, max_length=255, description="Contact email address"
