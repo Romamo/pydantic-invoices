@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.1
+
+- Relaxed `postal_code` validation in `Company` schema to support integer inputs (e.g. from YAML).
+- Updated release workflows.
+
+
 ## 1.3.0
 
 - Added `py.typed` marker.
