@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict, computed_field
+from pydantic import BaseModel, Field, ConfigDict, computed_field, model_validator
 from datetime import datetime, date
 from typing import Optional, List, TYPE_CHECKING
 
 
-
 class InvoiceStatus(str, Enum):
     """Valid invoice status values."""
+
     DRAFT = "DRAFT"
     SENT = "SENT"
     UNPAID = "UNPAID"  # Legacy/Simple flow
@@ -22,6 +22,7 @@ class InvoiceStatus(str, Enum):
 
 class InvoiceType(str, Enum):
     """Type of invoice document."""
+
     STANDARD = "STANDARD"
     CREDIT_NOTE = "CREDIT_NOTE"
 
@@ -84,6 +85,20 @@ class InvoiceBase(BaseModel):
     payment_note_ids: List[int] = Field(
         default_factory=list, description="IDs of payment notes to include"
     )
+    template_name: Optional[str] = Field(
+        None, max_length=255, description="Template filename used for this invoice"
+    )
+
+    @model_validator(mode="after")
+    def validate_due_date(self) -> "InvoiceBase":
+        """Ensure due date is not before issue date."""
+        if self.due_date and self.issue_date:
+            if self.due_date < self.issue_date.date():
+                raise ValueError(
+                    f"Due date ({self.due_date}) cannot be earlier than "
+                    f"issue date ({self.issue_date.date()})"
+                )
+        return self
 
 
 class InvoiceCreate(InvoiceBase):
@@ -104,7 +119,7 @@ class InvoiceUpdate(BaseModel):
     due_date: Optional[date] = None
     payment_terms: Optional[str] = Field(None, max_length=100)
     reason: Optional[str] = Field(None, max_length=500)
-
+    template_name: Optional[str] = Field(None, max_length=255)
 
 
 class Invoice(InvoiceBase):
@@ -142,7 +157,12 @@ class Invoice(InvoiceBase):
     @property
     def is_overdue(self) -> bool:
         """Check if invoice is past due date."""
-        if self.status in (InvoiceStatus.PAID, InvoiceStatus.CANCELLED, InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED):
+        if self.status in (
+            InvoiceStatus.PAID,
+            InvoiceStatus.CANCELLED,
+            InvoiceStatus.REFUNDED,
+            InvoiceStatus.CREDITED,
+        ):
             return False
         if self.due_date:
             return date.today() > self.due_date

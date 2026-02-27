@@ -242,3 +242,7 @@ cython_debug/
 #.idea/
 
 /.idea/
+
+# macOS
+.DS_Store
+**/.DS_Store

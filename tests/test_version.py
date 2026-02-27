@@ -9,6 +9,7 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib
 
+
 def test_version_consistency():
     # Paths
     root_dir = Path(__file__).parents[1]
@@ -32,20 +33,22 @@ def test_version_consistency():
     # 3. Get version from uv.lock
     with open(lock_path, "rb") as f:
         lock_data = tomllib.load(f)
-        
+
     lock_version = None
     # uv.lock 'package' matches are a list of dicts
     for package in lock_data.get("package", []):
         if package.get("name") == "pydantic-invoices":
             lock_version = package.get("version")
             break
-            
+
     if not lock_version:
         pytest.fail("Could not find pydantic-invoices version in uv.lock")
 
     # Assertions
-    assert pyproject_version == init_version, \
+    assert pyproject_version == init_version, (
         f"pyproject.toml version ({pyproject_version}) does not match __init__.py version ({init_version})"
-        
-    assert pyproject_version == lock_version, \
+    )
+
+    assert pyproject_version == lock_version, (
         f"pyproject.toml version ({pyproject_version}) does not match uv.lock version ({lock_version})"
+    )

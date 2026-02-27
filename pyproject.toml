@@ -71,7 +71,20 @@ disallow_untyped_defs = true
 
 [dependency-groups]
 dev = [
+    "bandit>=1.9.4",
     "mypy>=1.19.1",
     "pytest-cov>=7.0.0",
     "ruff>=0.14.10",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/pydantic_invoices",
+    "/tests",
+    "/CHANGELOG.md",
+]
+exclude = [
+    "/.agent",
+    "/.github",
+    "/uv.lock",
 ]

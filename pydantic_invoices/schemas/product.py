@@ -38,6 +38,9 @@ class ProductBase(BaseModel):
     category: Optional[str] = Field(
         None, max_length=100, description="Product category"
     )
+    preferred_template: Optional[str] = Field(
+        None, max_length=255, description="Preferred invoice template filename"
+    )
 
 
 class ProductCreate(ProductBase):

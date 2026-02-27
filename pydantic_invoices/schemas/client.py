@@ -16,6 +16,9 @@ class ClientBase(BaseModel):
         None, max_length=255, description="Client email address"
     )
     phone: Optional[str] = Field(None, max_length=50, description="Client phone number")
+    preferred_template: Optional[str] = Field(
+        None, max_length=255, description="Preferred invoice template filename"
+    )
 
 
 class ClientCreate(ClientBase):
