@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict, computed_field, model_validator
+from pydantic import BaseModel, Field, ConfigDict, computed_field, model_validator, field_validator
+from pydantic_invoices.vo import Money
 from datetime import datetime, date
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING, Any
 
 
 class InvoiceStatus(str, Enum):
@@ -42,6 +43,13 @@ class InvoiceBase(BaseModel):
     issue_date: datetime = Field(
         default_factory=datetime.now, description="Invoice issue date"
     )
+
+    @field_validator("issue_date", mode="before")
+    @classmethod
+    def parse_issue_date(cls, v: Any) -> Any:
+        if isinstance(v, date) and not isinstance(v, datetime):
+            return datetime.combine(v, datetime.min.time())
+        return v
     status: InvoiceStatus = Field(
         default=InvoiceStatus.DRAFT,
         description="Invoice payment status",
@@ -81,6 +89,17 @@ class InvoiceBase(BaseModel):
         None, max_length=50, description="Client tax ID at invoice time"
     )
 
+    # Company snapshots (immutable)
+    company_name_snapshot: Optional[str] = Field(
+        None, max_length=255, description="Company name at invoice time"
+    )
+    company_address_snapshot: Optional[str] = Field(
+        None, max_length=500, description="Company address at invoice time"
+    )
+    company_tax_id_snapshot: Optional[str] = Field(
+        None, max_length=50, description="Company tax ID at invoice time"
+    )
+
     # Payment notes (can select multiple)
     payment_note_ids: List[int] = Field(
         default_factory=list, description="IDs of payment notes to include"
@@ -111,6 +130,21 @@ class InvoiceCreate(InvoiceBase):
         description="Invoice payment status",
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def handle_legacy_fields(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            # Map 'date' to 'issue_date'
+            if "date" in data and "issue_date" not in data:
+                data["issue_date"] = data.pop("date")
+            
+            # Map 'payment_note_id' to 'payment_note_ids'
+            if "payment_note_id" in data and "payment_note_ids" not in data:
+                val = data.pop("payment_note_id")
+                if val:
+                    data["payment_note_ids"] = [val]
+        return data
+
 
 class InvoiceUpdate(BaseModel):
     """Schema for updating an invoice."""
@@ -122,34 +156,59 @@ class InvoiceUpdate(BaseModel):
     template_name: Optional[str] = Field(None, max_length=255)
 
 
+class InvoiceSummary(BaseModel):
+    """Schema for invoice statistics summary."""
+
+    total_count: int
+    paid_count: int
+    unpaid_count: int
+    overdue_count: int
+    total_amount: Money
+    total_paid: Money
+    total_due: Money
+
+
 class Invoice(InvoiceBase):
     """Complete invoice schema with computed properties."""
 
     id: int
-    company_id: int  # Required
+    company_id: int = Field(default=1)  # Keep default for DX
     client_id: int
+    template_name: Optional[str] = Field(default="default.html")
     type: InvoiceType = Field(default=InvoiceType.STANDARD)
     original_invoice_id: Optional[int] = None
     reason: Optional[str] = None
+
+    # Snapshots (immutable after creation)
+    client_name_snapshot: Optional[str] = None
+    client_address_snapshot: Optional[str] = None
+    client_tax_id_snapshot: Optional[str] = None
+    company_name_snapshot: Optional[str] = None
+    company_address_snapshot: Optional[str] = None
+    company_tax_id_snapshot: Optional[str] = None
     lines: List["InvoiceLine"] = Field(default_factory=list)
     payments: List["Payment"] = Field(default_factory=list)
     audit_logs: List["AuditLog"] = Field(default_factory=list)
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def total_amount(self) -> float:
+    def total_amount(self) -> Money:
         """Calculate total amount from all line items."""
-        return sum(line.total for line in self.lines)
+        # Get currency from the first line or default to USD
+        # In a real app, currency should be consistent across lines
+        currency = self.lines[0].unit_price.currency if self.lines and isinstance(self.lines[0].unit_price, Money) else "USD"
+        return sum((line.total for line in self.lines), start=Money(0, currency))
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def total_paid(self) -> float:
+    def total_paid(self) -> Money:
         """Calculate total amount paid across all payments."""
-        return sum(payment.amount for payment in self.payments)
+        currency = self.lines[0].unit_price.currency if self.lines and isinstance(self.lines[0].unit_price, Money) else "USD"
+        return sum((payment.amount for payment in self.payments), start=Money(0, currency))
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def balance_due(self) -> float:
+    def balance_due(self) -> Money:
         """Calculate remaining balance to be paid."""
         return self.total_amount - self.total_paid
 

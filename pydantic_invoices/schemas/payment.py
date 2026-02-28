@@ -1,6 +1,5 @@
-"""Payment schemas - Pure Pydantic models."""
-
 from pydantic import BaseModel, Field, ConfigDict
+from pydantic_invoices.vo import Money
 from datetime import datetime
 from typing import Optional
 
@@ -8,7 +7,7 @@ from typing import Optional
 class PaymentBase(BaseModel):
     """Base payment schema."""
 
-    amount: float = Field(..., gt=0, description="Payment amount")
+    amount: Money.Input = Field(..., description="Payment amount")
     payment_date: datetime = Field(
         default_factory=datetime.now, description="Date payment was received"
     )
@@ -31,5 +30,6 @@ class Payment(PaymentBase):
 
     id: int
     invoice_id: int
+    amount: Money
 
     model_config = ConfigDict(from_attributes=True)

@@ -10,6 +10,7 @@ from pydantic_invoices.schemas.invoice import (
 from pydantic_invoices.schemas.invoice_line import InvoiceLine, InvoiceLineCreate
 
 
+
 class TestInvoiceCreate:
     """Tests for InvoiceCreate schema."""
 
@@ -101,7 +102,7 @@ class TestInvoice:
             ],
             payments=[],
         )
-        assert invoice.total_amount == 400.0
+        assert invoice.total_amount.amount == 400.0
 
     def test_balance_due_with_no_payments(self):
         """Test balance_due when no payments made."""
@@ -125,7 +126,7 @@ class TestInvoice:
             ],
             payments=[],
         )
-        assert invoice.balance_due == 100.0
+        assert invoice.balance_due.amount == 100.0
 
     def test_is_overdue(self):
         """Test is_overdue property."""

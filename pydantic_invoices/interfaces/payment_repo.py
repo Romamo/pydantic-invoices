@@ -4,6 +4,7 @@ from abc import abstractmethod
 from typing import List
 from .base import BaseRepository
 from ..schemas import Payment, PaymentCreate
+from ..vo import Money
 
 
 class PaymentRepository(BaseRepository[Payment, PaymentCreate]):
@@ -15,6 +16,6 @@ class PaymentRepository(BaseRepository[Payment, PaymentCreate]):
         pass
 
     @abstractmethod
-    def get_total_for_invoice(self, invoice_id: int) -> float:
+    def get_total_for_invoice(self, invoice_id: int) -> Money:
         """Get total amount paid for an invoice."""
         pass

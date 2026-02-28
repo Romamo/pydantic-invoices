@@ -14,7 +14,7 @@ Advanced usage:
 """
 
 # Common schemas - used in most operations
-from .invoice import Invoice, InvoiceCreate, InvoiceUpdate, InvoiceStatus, InvoiceType
+from .invoice import Invoice, InvoiceCreate, InvoiceUpdate, InvoiceStatus, InvoiceType, InvoiceSummary
 from .invoice_line import InvoiceLine, InvoiceLineCreate
 from .client import Client, ClientCreate, ClientUpdate
 from .payment import Payment, PaymentCreate
@@ -26,6 +26,7 @@ __all__ = [
     "InvoiceUpdate",
     "InvoiceStatus",
     "InvoiceType",
+    "InvoiceSummary",
     # Invoice Line
     "InvoiceLine",
     "InvoiceLineCreate",

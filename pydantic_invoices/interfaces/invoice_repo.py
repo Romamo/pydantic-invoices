@@ -1,9 +1,9 @@
 """Invoice repository interface."""
 
 from abc import abstractmethod
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 from .base import BaseRepository
-from ..schemas import Invoice, InvoiceCreate, InvoiceStatus
+from ..schemas import Invoice, InvoiceCreate, InvoiceStatus, InvoiceSummary
 
 
 class InvoiceRepository(BaseRepository[Invoice, InvoiceCreate]):
@@ -30,6 +30,6 @@ class InvoiceRepository(BaseRepository[Invoice, InvoiceCreate]):
         pass
 
     @abstractmethod
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> InvoiceSummary:
         """Get invoice statistics summary."""
         pass
