@@ -10,7 +10,6 @@ from pydantic_invoices.schemas.invoice import (
 from pydantic_invoices.schemas.invoice_line import InvoiceLine, InvoiceLineCreate
 
 
-
 class TestInvoiceCreate:
     """Tests for InvoiceCreate schema."""
 

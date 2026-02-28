@@ -14,7 +14,14 @@ Advanced usage:
 """
 
 # Common schemas - used in most operations
-from .invoice import Invoice, InvoiceCreate, InvoiceUpdate, InvoiceStatus, InvoiceType, InvoiceSummary
+from .invoice import (
+    Invoice,
+    InvoiceCreate,
+    InvoiceUpdate,
+    InvoiceStatus,
+    InvoiceType,
+    InvoiceSummary,
+)
 from .invoice_line import InvoiceLine, InvoiceLineCreate
 from .client import Client, ClientCreate, ClientUpdate
 from .payment import Payment, PaymentCreate

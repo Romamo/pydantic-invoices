@@ -13,7 +13,9 @@ class Money:
     Internally uses decimal.Decimal to avoid rounding errors.
     """
 
-    def __init__(self, amount: Decimal | str | float | int, currency: str = "USD") -> None:
+    def __init__(
+        self, amount: Decimal | str | float | int, currency: str = "USD"
+    ) -> None:
         if isinstance(amount, (str, float, int)):
             self._amount = self._parse_amount(amount)
         else:
@@ -32,33 +34,33 @@ class Money:
         """Parse various input formats including regional settings."""
         if isinstance(value, (int, float)):
             return Decimal(str(value))
-        
+
         if not isinstance(value, str):
             raise ValueError(f"Cannot parse {type(value)} as Money")
 
         # Clean string from whitespace
         clean_val = value.strip()
-        
+
         # Rule-based regional parsing:
         # If both '.' and ',' exist, we assume the last one is the decimal separator.
         # Example: 1.234,56 -> 1234.56
         # Example: 1,234.56 -> 1234.56
-        if ',' in clean_val and '.' in clean_val:
-            comma_idx = clean_val.rfind(',')
-            point_idx = clean_val.rfind('.')
+        if "," in clean_val and "." in clean_val:
+            comma_idx = clean_val.rfind(",")
+            point_idx = clean_val.rfind(".")
             if comma_idx > point_idx:
                 # Comma is decimal separator: 1.234,56
-                clean_val = clean_val.replace('.', '').replace(',', '.')
+                clean_val = clean_val.replace(".", "").replace(",", ".")
             else:
                 # Point is decimal separator: 1,234.56
-                clean_val = clean_val.replace(',', '')
-        elif ',' in clean_val:
+                clean_val = clean_val.replace(",", "")
+        elif "," in clean_val:
             # Only comma exists. Is it a decimal or thousand separator?
             # If there's only one comma and it's followed by exactly 2 or 3 digits
             # it's ambiguous. We'll treat it as a decimal separator for now
             # as is common in many regions.
-            clean_val = clean_val.replace(',', '.')
-        
+            clean_val = clean_val.replace(",", ".")
+
         try:
             return Decimal(clean_val)
         except InvalidOperation:
@@ -88,28 +90,36 @@ class Money:
         if not isinstance(other, Money):
             other = Money(other, self.currency)
         if self.currency != other.currency:
-            raise ValueError(f"Cannot compare different currencies: {self.currency} and {other.currency}")
+            raise ValueError(
+                f"Cannot compare different currencies: {self.currency} and {other.currency}"
+            )
         return self.amount < other.amount
 
     def __le__(self, other: "Money" | Decimal | float | int) -> bool:
         if not isinstance(other, Money):
             other = Money(other, self.currency)
         if self.currency != other.currency:
-            raise ValueError(f"Cannot compare different currencies: {self.currency} and {other.currency}")
+            raise ValueError(
+                f"Cannot compare different currencies: {self.currency} and {other.currency}"
+            )
         return self.amount <= other.amount
 
     def __gt__(self, other: "Money" | Decimal | float | int) -> bool:
         if not isinstance(other, Money):
             other = Money(other, self.currency)
         if self.currency != other.currency:
-            raise ValueError(f"Cannot compare different currencies: {self.currency} and {other.currency}")
+            raise ValueError(
+                f"Cannot compare different currencies: {self.currency} and {other.currency}"
+            )
         return self.amount > other.amount
 
     def __ge__(self, other: "Money" | Decimal | float | int) -> bool:
         if not isinstance(other, Money):
             other = Money(other, self.currency)
         if self.currency != other.currency:
-            raise ValueError(f"Cannot compare different currencies: {self.currency} and {other.currency}")
+            raise ValueError(
+                f"Cannot compare different currencies: {self.currency} and {other.currency}"
+            )
         return self.amount >= other.amount
 
     def __format__(self, format_spec: str) -> str:
@@ -120,14 +130,18 @@ class Money:
         if not isinstance(other, Money):
             other = Money(other, self.currency)
         if self.currency != other.currency:
-            raise ValueError(f"Cannot add different currencies: {self.currency} and {other.currency}")
+            raise ValueError(
+                f"Cannot add different currencies: {self.currency} and {other.currency}"
+            )
         return Money(self.amount + other.amount, self.currency)
 
     def __sub__(self, other: Money | Decimal | float | int) -> Money:
         if not isinstance(other, Money):
             other = Money(other, self.currency)
         if self.currency != other.currency:
-            raise ValueError(f"Cannot subtract different currencies: {self.currency} and {other.currency}")
+            raise ValueError(
+                f"Cannot subtract different currencies: {self.currency} and {other.currency}"
+            )
         return Money(self.amount - other.amount, self.currency)
 
     def __mul__(self, factor: int | Decimal | float) -> Money:

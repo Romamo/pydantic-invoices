@@ -2,7 +2,14 @@
 
 from __future__ import annotations
 from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict, computed_field, model_validator, field_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    ConfigDict,
+    computed_field,
+    model_validator,
+    field_validator,
+)
 from pydantic_invoices.vo import Money
 from datetime import datetime, date
 from typing import Optional, List, TYPE_CHECKING, Any
@@ -50,6 +57,7 @@ class InvoiceBase(BaseModel):
         if isinstance(v, date) and not isinstance(v, datetime):
             return datetime.combine(v, datetime.min.time())
         return v
+
     status: InvoiceStatus = Field(
         default=InvoiceStatus.DRAFT,
         description="Invoice payment status",
@@ -137,7 +145,7 @@ class InvoiceCreate(InvoiceBase):
             # Map 'date' to 'issue_date'
             if "date" in data and "issue_date" not in data:
                 data["issue_date"] = data.pop("date")
-            
+
             # Map 'payment_note_id' to 'payment_note_ids'
             if "payment_note_id" in data and "payment_note_ids" not in data:
                 val = data.pop("payment_note_id")
@@ -196,15 +204,25 @@ class Invoice(InvoiceBase):
         """Calculate total amount from all line items."""
         # Get currency from the first line or default to USD
         # In a real app, currency should be consistent across lines
-        currency = self.lines[0].unit_price.currency if self.lines and isinstance(self.lines[0].unit_price, Money) else "USD"
+        currency = (
+            self.lines[0].unit_price.currency
+            if self.lines and isinstance(self.lines[0].unit_price, Money)
+            else "USD"
+        )
         return sum((line.total for line in self.lines), start=Money(0, currency))
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def total_paid(self) -> Money:
         """Calculate total amount paid across all payments."""
-        currency = self.lines[0].unit_price.currency if self.lines and isinstance(self.lines[0].unit_price, Money) else "USD"
-        return sum((payment.amount for payment in self.payments), start=Money(0, currency))
+        currency = (
+            self.lines[0].unit_price.currency
+            if self.lines and isinstance(self.lines[0].unit_price, Money)
+            else "USD"
+        )
+        return sum(
+            (payment.amount for payment in self.payments), start=Money(0, currency)
+        )
 
     @computed_field  # type: ignore[prop-decorator]
     @property
