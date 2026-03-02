@@ -1,6 +1,7 @@
 import pytest
 from decimal import Decimal
-from pydantic_invoices.vo import Money
+from pydantic import BaseModel
+from pydantic_invoices.vo import Money, TaxId
 
 
 def test_money_basic_parsing():
@@ -54,3 +55,52 @@ def test_money_pydantic_validation():
 
     # Check serialization
     assert m.model_dump()["price"] == "1234.56"
+
+
+def test_taxid_eu_vat_parsing():
+    # Valid EU VAT (Cyprus)
+    t = TaxId("CY10259033P")
+    assert t.value == "CY10259033P"
+
+    # With spaces/lowercase
+    t2 = TaxId(" cy 10259 033p ")
+    assert t2.value == "CY10259033P"
+
+
+def test_taxid_us_ein_parsing():
+    # Valid US EIN
+    t = TaxId("12-3456789")
+    # Normalized format inside python-stdnum drops the hyphen
+    assert t.value == "123456789"
+
+
+def test_taxid_fallback_parsing():
+    # A generic alphanumeric id that is not specifically validated
+    # should fallback and be accepted
+    t = TaxId("GENERIC-123")
+    assert t.value == "GENERIC-123"
+
+
+def test_taxid_invalid_parsing():
+    # symbols or empty or too short should fail fast
+    with pytest.raises(ValueError):
+        TaxId("")
+
+    with pytest.raises(ValueError, match="Invalid Tax ID format"):
+        TaxId("a!")
+
+    with pytest.raises(ValueError, match="Invalid Tax ID format"):
+        TaxId("123")  # too short
+
+
+def test_taxid_pydantic_validation():
+    class CompanyModel(BaseModel):
+        tax_id: TaxId
+
+    # Should coerce string seamlessly
+    m = CompanyModel(tax_id="CY10259033P")
+    assert isinstance(m.tax_id, TaxId)
+    assert m.tax_id.value == "CY10259033P"
+
+    # Should serialize seamlessly back to string
+    assert m.model_dump()["tax_id"] == "CY10259033P"

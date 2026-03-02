@@ -8,10 +8,9 @@ from pydantic import (
     ConfigDict,
     computed_field,
     model_validator,
-    field_validator,
 )
 from pydantic_invoices.vo import Money
-from datetime import datetime, date
+from datetime import date
 from typing import Optional, List, TYPE_CHECKING, Any
 
 
@@ -47,16 +46,9 @@ class InvoiceBase(BaseModel):
     number: str = Field(
         ..., min_length=1, max_length=50, description="Unique invoice number"
     )
-    issue_date: datetime = Field(
-        default_factory=datetime.now, description="Invoice issue date"
+    issue_date: date = Field(
+        default_factory=date.today, description="Invoice issue date"
     )
-
-    @field_validator("issue_date", mode="before")
-    @classmethod
-    def parse_issue_date(cls, v: Any) -> Any:
-        if isinstance(v, date) and not isinstance(v, datetime):
-            return datetime.combine(v, datetime.min.time())
-        return v
 
     status: InvoiceStatus = Field(
         default=InvoiceStatus.DRAFT,
@@ -120,10 +112,10 @@ class InvoiceBase(BaseModel):
     def validate_due_date(self) -> "InvoiceBase":
         """Ensure due date is not before issue date."""
         if self.due_date and self.issue_date:
-            if self.due_date < self.issue_date.date():
+            if self.due_date < self.issue_date:
                 raise ValueError(
                     f"Due date ({self.due_date}) cannot be earlier than "
-                    f"issue date ({self.issue_date.date()})"
+                    f"issue date ({self.issue_date})"
                 )
         return self
 

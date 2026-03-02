@@ -1,10 +1,24 @@
 """Value Objects for the Accounting domain."""
 
 from __future__ import annotations
+import re
 from decimal import Decimal, InvalidOperation
-from typing import Any, TYPE_CHECKING, Union
+from typing import Any, TYPE_CHECKING, Union, Callable
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import core_schema
+from stdnum.exceptions import ValidationError as StdnumValidationError
+import stdnum.eu.vat
+import stdnum.gb.vat
+import stdnum.us.ein
+import stdnum.au.abn
+
+
+_TAX_ID_VALIDATORS: list[Callable[[str], str]] = [
+    stdnum.eu.vat.validate,
+    stdnum.gb.vat.validate,
+    stdnum.us.ein.validate,
+    stdnum.au.abn.validate,
+]
 
 
 class Money:
@@ -174,11 +188,93 @@ class Money:
         try:
             return cls(value)
         except (ValueError, InvalidOperation) as e:
-            raise ValueError(str(e))
+            raise ValueError(str(e)) from e
 
     if TYPE_CHECKING:
         Input = Union["Money", str, Decimal, float, int]
 
 
+class TaxId:
+    """Tax Identification Number (e.g., EIN, VAT, TIC, ABN).
+
+    Provides universal validation via python-stdnum and fails fast
+    if the format is invalid. Avoids primitive obsession.
+    """
+
+    def __init__(self, value: str | "TaxId") -> None:
+        if isinstance(value, TaxId):
+            self._value = value.value
+            return
+
+        if not isinstance(value, str):
+            raise ValueError(f"Cannot parse {type(value)} as TaxId")
+
+        clean_val = value.strip().upper()
+        if not clean_val:
+            raise ValueError("TaxId cannot be empty")
+
+        self._value = self._validate_and_normalize(clean_val)
+
+    def _validate_and_normalize(self, value: str) -> str:
+        """Try each known validator in order; fall back to a generic regex."""
+        for validate in _TAX_ID_VALIDATORS:
+            try:
+                return validate(value)
+            except StdnumValidationError:
+                continue
+
+        # Fallback: strict alphanumeric structural check for unknown formats
+        if not re.match(r"^[A-Z0-9\- \.]{5,30}$", value):
+            raise ValueError(f"Invalid Tax ID format: {value}")
+
+        return value
+
+    @property
+    def value(self) -> str:
+        return self._value
+
+    def __str__(self) -> str:
+        return self._value
+
+    def __repr__(self) -> str:
+        return f"TaxId('{self._value}')"
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, TaxId):
+            return self.value == other.value
+        if isinstance(other, str):
+            return self.value == other
+        return False
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, _source_type: Any, _handler: GetCoreSchemaHandler
+    ) -> core_schema.CoreSchema:
+        return core_schema.no_info_plain_validator_function(
+            cls._validate,
+            serialization=core_schema.plain_serializer_function_ser_schema(
+                cls._serialize,
+                when_used="always",
+            ),
+        )
+
+    @classmethod
+    def _validate(cls, value: Any) -> "TaxId":
+        if isinstance(value, cls):
+            return value
+        try:
+            return cls(value)
+        except ValueError as e:
+            raise ValueError(str(e)) from e
+
+    @classmethod
+    def _serialize(cls, instance: "TaxId") -> str:
+        return instance.value
+
+    if TYPE_CHECKING:
+        Input = Union["TaxId", str]
+
+
 if not TYPE_CHECKING:
     Money.Input = Union[Money, str, Decimal, float, int]
+    TaxId.Input = Union[TaxId, str]

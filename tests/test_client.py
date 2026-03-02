@@ -15,7 +15,7 @@ class TestClientCreate:
         )
         assert client.name == "Acme Corp"
         assert client.address == "123 Main St"
-        assert client.tax_id == "12-3456789"
+        assert client.tax_id == "123456789"
 
     def test_minimal_client(self):
         """Test creating client with minimal required fields."""

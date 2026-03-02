@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.1
+
+- Added `TaxId` Value Object with multi-format validation via `python-stdnum` (EU VAT, UK VAT, US EIN, AU ABN) and a generic alphanumeric fallback.
+- Applied `TaxId` to `tax_id` fields in `CompanyBase`, `CompanyUpdate`, `ClientBase`, and `ClientUpdate` schemas.
+- Simplified `InvoiceBase.issue_date` to use `date` instead of `datetime`, removing the now-redundant `parse_issue_date` validator.
+
 ## 1.3.1
 
 - Relaxed `postal_code` validation in `Company` schema to support integer inputs (e.g. from YAML).

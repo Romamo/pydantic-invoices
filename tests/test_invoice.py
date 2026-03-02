@@ -1,6 +1,6 @@
 """Tests for Invoice schema."""
 
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 from pydantic_invoices.schemas.invoice import (
     Invoice,
     InvoiceCreate,
@@ -19,7 +19,7 @@ class TestInvoiceCreate:
             number="INV-001",
             client_id=1,
             company_id=1,
-            issue_date=datetime.now(),
+            issue_date=date.today(),
             due_date=date.today() + timedelta(days=30),
             status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
@@ -34,7 +34,7 @@ class TestInvoiceCreate:
         invoice = InvoiceCreate(
             number="INV-001",
             client_id=1,
-            issue_date=datetime.now(),
+            issue_date=date.today(),
             due_date=date.today(),
             status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
@@ -59,7 +59,7 @@ class TestInvoiceCreate:
         invoice = InvoiceCreate(
             number="INV-001",
             client_id=1,
-            issue_date=datetime.now(),
+            issue_date=date.today(),
             due_date=date.today(),
             status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
@@ -79,7 +79,7 @@ class TestInvoice:
             number="INV-001",
             client_id=1,
             company_id=1,
-            issue_date=datetime.now(),
+            issue_date=date.today(),
             due_date=date.today(),
             status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
@@ -110,7 +110,7 @@ class TestInvoice:
             number="INV-001",
             client_id=1,
             company_id=1,
-            issue_date=datetime.now(),
+            issue_date=date.today(),
             due_date=date.today(),
             status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
@@ -135,7 +135,7 @@ class TestInvoice:
             number="INV-001",
             client_id=1,
             company_id=1,
-            issue_date=datetime.now(),
+            issue_date=date.today(),
             due_date=date.today() + timedelta(days=1),
             status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
@@ -150,7 +150,7 @@ class TestInvoice:
             number="INV-002",
             client_id=1,
             company_id=1,
-            issue_date=datetime.now() - timedelta(days=60),
+            issue_date=date.today() - timedelta(days=60),
             due_date=date.today() - timedelta(days=30),
             status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",
@@ -166,7 +166,7 @@ class TestInvoice:
             number="INV-001",
             client_id=1,
             company_id=1,
-            issue_date=datetime.now() - timedelta(days=60),
+            issue_date=date.today() - timedelta(days=60),
             due_date=date.today() - timedelta(days=30),
             status=InvoiceStatus.PAID,
             payment_terms="Net 30",
@@ -182,7 +182,7 @@ class TestInvoice:
             number="INV-001",
             client_id=1,
             company_id=1,
-            issue_date=datetime.now(),
+            issue_date=date.today(),
             due_date=None,  # No due date
             status=InvoiceStatus.UNPAID,
             payment_terms="Net 30",

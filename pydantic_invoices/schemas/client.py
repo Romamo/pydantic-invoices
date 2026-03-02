@@ -2,6 +2,7 @@
 
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
+from pydantic_invoices.vo import TaxId
 
 
 class ClientBase(BaseModel):
@@ -9,9 +10,7 @@ class ClientBase(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=255, description="Client name")
     address: Optional[str] = Field(None, max_length=500, description="Client address")
-    tax_id: Optional[str] = Field(
-        None, max_length=50, description="Client tax ID number"
-    )
+    tax_id: Optional[TaxId.Input] = Field(None, description="Client tax ID number")
     email: Optional[str] = Field(
         None, max_length=255, description="Client email address"
     )
@@ -32,7 +31,7 @@ class ClientUpdate(BaseModel):
 
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     address: Optional[str] = Field(None, max_length=500)
-    tax_id: Optional[str] = Field(None, max_length=50)
+    tax_id: Optional[TaxId.Input] = None
     email: Optional[str] = Field(None, max_length=255)
     phone: Optional[str] = Field(None, max_length=50)
 

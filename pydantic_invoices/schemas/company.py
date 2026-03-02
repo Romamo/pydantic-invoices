@@ -2,6 +2,7 @@
 
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from typing import Optional, Union
+from pydantic_invoices.vo import TaxId
 
 
 class CompanyBase(BaseModel):
@@ -11,9 +12,7 @@ class CompanyBase(BaseModel):
     legal_name: Optional[str] = Field(
         None, max_length=255, description="Full legal name of the company"
     )
-    tax_id: Optional[str] = Field(
-        None, max_length=50, description="Tax identification number"
-    )
+    tax_id: Optional[TaxId.Input] = Field(None, description="Tax identification number")
     registration_number: Optional[str] = Field(
         None, max_length=50, description="Company registration number"
     )
@@ -67,7 +66,7 @@ class CompanyUpdate(BaseModel):
 
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     legal_name: Optional[str] = Field(None, max_length=255)
-    tax_id: Optional[str] = Field(None, max_length=50)
+    tax_id: Optional[TaxId.Input] = None
     registration_number: Optional[str] = Field(None, max_length=50)
     address: Optional[str] = Field(None, max_length=500)
     city: Optional[str] = Field(None, max_length=100)
